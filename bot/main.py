@@ -108,7 +108,7 @@ async def send_notification(message: types.Message, state: FSMContext):
                
                 
           
-            for dat in data_to_show:
+            for dat in data_to_show.reverse():
                 if dat not in data['projects']:
                     data['projects'].append(dat)
                     action = dat['action_name']
