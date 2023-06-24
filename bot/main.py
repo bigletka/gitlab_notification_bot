@@ -89,27 +89,26 @@ async def send_notification(message: types.Message, state: FSMContext):
 
         while True:
             resp = await get_data(token=data['token'], url=data['url'], project_id=data['project_id'])
-                
             api_resp = await resp.json()
-           
             resp.close()
-           
             response_from_server = await get_from_server(data['chat_id'])
-            data_from_server = response_from_server['json']
-            if data_from_server:
-                
+           
+
+            if response_from_server.status != 500:
+                response_from_server = await response_from_server.json()
+                data_from_server = response_from_server['json']
                 data_to_show = [i for i in data_from_server + api_resp if i not in data_from_server or i not in api_resp]
                 await patch_to_server(chat_id=data['chat_id'], data=api_resp)
-                datas = [i for i in data_from_server + api_resp if i not in data_from_server or i not in api_resp]
-                print(response_from_server)
+               
 
             else:
-                resp = await post_to_server(url=data['url'], token=data['token'], project_id=data['project_id'],
-                                            chat_id=data['chat_id'], data=datas)
+                data_to_show = api_resp
+                await post_to_server(url=data['url'], token=data['token'], project_id=data['project_id'],
+                                            chat_id=data['chat_id'], data=api_resp)
                 print(resp)
 
                 
-
+          
             for dat in data_to_show:
                 if dat not in data['projects']:
                     data['projects'].append(dat)
@@ -124,7 +123,7 @@ async def send_notification(message: types.Message, state: FSMContext):
                         t=t+f'Branch Name: {branch} \n Title: {commit}'
 
                    
-                    text = f'Action: {action} \n User: {user} \n Time:  {exact_time}\n  Date: {date}' + t
+                    text = f'Action: {action} \n User: {user} \n Time:  {exact_time}\n  Date: {date}\n' + t
                     await message.answer(text)   
             
             time.sleep(5) 

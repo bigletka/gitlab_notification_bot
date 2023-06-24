@@ -30,10 +30,13 @@ async def post_to_server(url, token, project_id, chat_id, data):
 
 async def get_from_server(chat_id):
     url = 'http://127.0.0.1:8000'
-    data = await aiohttp.ClientSession(url).get(f'/api/{chat_id}/')
-    res = await data.json()
+
+    try:
+        data = await aiohttp.ClientSession(url).get(f'/api/{chat_id}/')
+    except:
+        return None
     
-    return res
+    return data
 
 
 async def patch_to_server(chat_id, data):
