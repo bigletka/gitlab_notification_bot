@@ -107,8 +107,8 @@ async def send_notification(message: types.Message, state: FSMContext):
                                             chat_id=data['chat_id'], data=response_from_api)
                
                 
-          
-            for dat in data_to_show.reverse():
+            data_to_show.reverse()
+            for dat in data_to_show:
                 if dat not in data['projects']:
                     data['projects'].append(dat)
                     action = dat['action_name']
@@ -122,7 +122,7 @@ async def send_notification(message: types.Message, state: FSMContext):
                         t=t+f'Branch Name: {branch} \n Title: {commit}'
 
                    
-                    text = f'Action: {action} \n User: {user} \n Time:  {exact_time}\n  Date: {date}\n' + t
+                    text = f'Action id: {dat["id"]}\n Action: {action} \n User: {user} \n Time:  {exact_time[0:8]}\n  Date: {date}\n' + t
                     await message.answer(text)   
             
             time.sleep(5) 
