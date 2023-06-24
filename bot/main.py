@@ -79,34 +79,33 @@ async def process_url(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=Form.project_id)
 async def send_notification(message: types.Message, state: FSMContext):
-    
-    async with state.proxy() as data:
-        data['project_id'] = message.text
-        data['projects'] = []
-        data['chat_id'] = message.chat.id
+    while True:
+        async with state.proxy() as data:
+            data['project_id'] = message.text
+            data['projects'] = []
+            data['chat_id'] = message.chat.id
        
 
 
-        while True:
-            resp = await get_data(token=data['token'], url=data['url'], project_id=data['project_id'])
-            api_resp = await resp.json()
-            resp.close()
+       
+            response_from_api = await get_data(token=data['token'], url=data['url'], project_id=data['project_id'])
+            
+          
             response_from_server = await get_from_server(data['chat_id'])
-           
+            
 
-            if response_from_server.status != 500:
-                response_from_server = await response_from_server.json()
+            if response_from_server != 500:
                 data_from_server = response_from_server['json']
-                data_to_show = [i for i in data_from_server + api_resp if i not in data_from_server or i not in api_resp]
-                await patch_to_server(chat_id=data['chat_id'], data=api_resp)
+                data_to_show = [i for i in data_from_server + response_from_api if i not in data_from_server or i not in data_from_server]
+                resp = await patch_to_server(chat_id=data['chat_id'], data=response_from_api)
+               
                
 
             else:
-                data_to_show = api_resp
-                await post_to_server(url=data['url'], token=data['token'], project_id=data['project_id'],
-                                            chat_id=data['chat_id'], data=api_resp)
-                print(resp)
-
+                data_to_show = response_from_api
+                resp = await post_to_server(url=data['url'], token=data['token'], project_id=data['project_id'],
+                                            chat_id=data['chat_id'], data=response_from_api)
+               
                 
           
             for dat in data_to_show:
